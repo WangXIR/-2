@@ -1,0 +1,170 @@
+import pygame
+import random
+import os
+FPS=60 #1秒最多更新60次
+R,G,B=255,255,255 #視窗背景顏色設定
+X,Y=1000,700 #視窗大小設定
+#遊戲初始化&創建視窗
+
+pygame.init() #初始化
+win=pygame.display.set_mode((X,Y)) #視窗大小
+pygame.display.set_caption("小李的奇幻冒險") #標題設定
+clock=pygame.time.Clock()
+
+#載入圖片
+baimg = pygame.image.load(os.path.join("im","samo.png")).convert()
+playerimg = pygame.image.load(os.path.join("im","do.png")).convert()
+ballimg = pygame.image.load(os.path.join("im","c.png")).convert()
+ball2img = pygame.image.load(os.path.join("im","lee.png")).convert()
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(playerimg,(30,30)) #pygame.Surface((20,20)) 圖片寬高
+        self.image.set_colorkey((255,255,255)) #去顏色
+        self.image.set_colorkey((0,0,0)) #去顏色
+        #self.image.fill((0,255,0)) #填滿顏色
+        self.rect = self.image.get_rect() #圖片定位 rect(定位)
+        self.radius=15 #半徑15
+        #pygame.draw.circle(self.image,(255,0,0), self.rect.center,self.radius) #測試範圍
+        self.rect.center = (X/2,Y/2) #定位在中間
+        self.speedx = 5 #速度
+    def update(self): #更新內容
+        key_pressed = pygame.key.get_pressed() #回傳鍵盤是否有按下按鍵
+        if key_pressed[pygame.K_RIGHT]: #右鍵按下去
+            self.rect.x+=self.speedx
+        if key_pressed[pygame.K_LEFT]: #左鍵按下去
+            self.rect.x-=self.speedx
+        if key_pressed[pygame.K_UP]: #上鍵按下去
+            self.rect.y-=self.speedx
+        if key_pressed[pygame.K_DOWN]: #下鍵按下去
+            self.rect.y+=self.speedx
+        if self.rect.right > X:
+            self.rect.right = X
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > Y:
+            self.rect.bottom = Y
+    def shoot(self):
+        bullet = Bullet(self.rect.centerx,self.rect.top)
+        all_sprites.add(bullet)
+
+class Rock(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        b=random.randint(1,2)
+        if b==1:
+            self.image = pygame.transform.scale(ballimg,(50,50))#pygame.Surface((20,20)) #圖片寬高
+            self.rect = self.image.get_rect() #圖片定位 rect(定位)
+            self.radius=20 #半徑15
+            #pygame.draw.circle(self.image,(255,0,0), self.rect.center,self.radius) #測試範圍
+        elif b==2:
+            self.image = pygame.transform.scale(ball2img,(50,50))#pygame.Surface((20,20)) #圖片寬高
+            self.rect = self.image.get_rect() #圖片定位 rect(定位)
+            self.radius=25 #半徑15
+            #pygame.draw.circle(self.image,(255,0,0), self.rect.center,self.radius) #測試範圍
+        self.image.set_colorkey((255,255,255))
+        self.image.set_colorkey((0,0,0))
+        #self.image.fill((255,0,0)) #填滿顏色
+        
+        
+        r=random.randint(1,4)
+        if r == 1:
+            self.rect.x = random.randrange(0,X - self.rect.width) #X座標
+            self.rect.y = random.randrange(Y- self.rect.height,Y)#Y座標
+            self.speedy = random.randrange(-2,-1) #Y速度
+            self.speedx = random.randrange(-1,1) #速度
+        elif r ==2:
+            self.rect.x = random.randrange(0,X - self.rect.width) #X座標
+            self.rect.y = random.randrange(0,20)#Y座標
+            self.speedy = random.randrange(1,2) #Y速度
+            self.speedx = random.randrange(-1,1) #速度
+        elif r ==3:
+            self.rect.x = random.randrange(0,20) #X座標
+            self.rect.y = random.randrange(0,Y- self.rect.height)#Y座標
+            self.speedy = random.randrange(-1,1) #Y速度
+            self.speedx = random.randrange(1,2) #速度
+        elif r ==4:
+            self.rect.x = random.randrange(X - self.rect.width,X) #X座標
+            self.rect.y = random.randrange(0,Y- self.rect.height)#Y座標
+            self.speedy = random.randrange(-1,1) #Y速度
+            self.speedx = random.randrange(-2,-1) #速度
+    def update(self): #更新內容
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.top > Y or self.rect.left > X or self.rect.right < 0 or self.rect.bottom < 0:
+            r=random.randint(1,4)
+            if r == 1:
+                self.rect.x = random.randrange(0,X - self.rect.width) #X座標
+                self.rect.y = random.randrange(Y- self.rect.height,Y)#Y座標
+                self.speedy = random.randrange(-2,-1) #Y速度
+                self.speedx = random.randrange(-1,1) #速度
+            elif r ==2:
+                self.rect.x = random.randrange(0,X - self.rect.width) #X座標
+                self.rect.y = random.randrange(0,20)#Y座標
+                self.speedy = random.randrange(1,2) #Y速度
+                self.speedx = random.randrange(-1,1) #速度
+            elif r ==3:
+                self.rect.x = random.randrange(0,20) #X座標
+                self.rect.y = random.randrange(0,Y- self.rect.height)#Y座標
+                self.speedy = random.randrange(-1,1) #Y速度
+                self.speedx = random.randrange(1,2) #速度
+            elif r ==4:
+                self.rect.x = random.randrange(X - self.rect.width,X) #X座標
+                self.rect.y = random.randrange(0,Y- self.rect.height)#Y座標
+                self.speedy = random.randrange(-1,1) #Y速度
+                self.speedx = random.randrange(-2,-1) #速度
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10,10)) #圖片寬高
+        self.image.fill((0,0,0)) #填滿顏色
+        self.rect = self.image.get_rect() #圖片定位 rect(定位)
+        self.rect.centerx = x
+        self.rect.bottom = y
+        self.speedy = -10 #Y速度
+    def update(self): #更新內容
+        self.rect.y+=self.speedy
+        if self.rect.bottom < 0: #如果跑出視窗
+            self.kill() #刪掉
+
+all_sprites = pygame.sprite.Group()
+players = pygame.sprite.Group()
+rocks = pygame.sprite.Group()
+player = Player()
+
+
+all_sprites.add(player)
+players.add(player)
+for i in range(5): #產生20顆石頭
+    rock=Rock()
+    all_sprites.add(rock)
+    rocks.add(rock)
+
+#遊戲迴圈
+running = True
+while running:
+    clock.tick(FPS) #1秒鐘最多只能執行X次
+    #取得輸入
+    for event in pygame.event.get(): #event.get()回傳列表(列表)
+        if event.type == pygame.QUIT:#如果回傳是關掉 則停止迴圈
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
+
+    #更新遊戲
+    all_sprites.update() #執行群組裡每一個物件update
+    #pygame.sprite.groupcollide(players,rocks,False,True)
+    hits = pygame.sprite.spritecollide(player,rocks,False,pygame.sprite.collide_circle)
+    if hits:
+        running = False
+    #顯示畫面
+    win.fill((0,0,0))
+    #win.blit(baimg,(0,0))
+    all_sprites.draw(win) #把群組裡面的東西全部畫出在視窗上
+    pygame.display.update()
+pygame.quit() #打X關閉視窗
